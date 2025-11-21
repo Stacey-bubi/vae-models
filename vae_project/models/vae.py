@@ -1,0 +1,117 @@
+from ..imports import *
+from ..utils import default_device
+
+class Encoder(nn.Module):
+    def __init__(
+        self,
+        channel_nums: list[int],
+        latent_dim: int,
+        input_size: Tuple[int, int],
+        h_dim: int = 128,
+        act_fn: nn.Module = nn.ReLU(),
+    ) -> None:
+        super().__init__()
+        self.act_fn, self.latent_dim, self.h_dim = act_fn, latent_dim, h_dim
+
+        convs = []
+        for i in range(len(channel_nums) - 1):
+            convs.extend([nn.Conv2d(channel_nums[i], channel_nums[i + 1], kernel_size=3, stride=2, padding=1), act_fn])
+        self.convs = nn.Sequential(*convs)
+
+        # Calculate flattened size dynamically
+        with t.no_grad():
+            dummy_input = t.zeros(1, channel_nums[0], *input_size)
+            self.final_shape = self.convs(dummy_input).shape
+            self.flat_sz = self.convs(dummy_input).view(-1).shape[0]
+
+        self.fc1 = nn.Linear(self.flat_sz, h_dim)
+        self.fc_mu = nn.Linear(h_dim, latent_dim)
+        self.fc_log_var = nn.Linear(h_dim, latent_dim)
+
+    def forward(self, x: t.Tensor) -> Tuple[t.Tensor, t.Tensor]:
+        x = self.convs(x)
+        x = x.view(-1, self.flat_sz)  # Flatten
+        x = self.act_fn(self.fc1(x))
+        return self.fc_mu(x), self.fc_log_var(x)
+
+
+class Decoder(nn.Module):
+    def __init__(self, channels_n, latent_dim, enc_final_shape, h_dim=128, act_fn=nn.ReLU()):
+        super().__init__()
+        self.act_fn, self.latent_dim, self.h_dim = act_fn, latent_dim, h_dim
+
+        self.start_c, self.start_h, self.start_w = enc_final_shape[1:]
+        self.fc_flat_sz = self.start_c * self.start_h * self.start_w
+
+        self.fc1 = nn.Linear(latent_dim, h_dim)
+        self.fc2 = nn.Linear(h_dim, self.fc_flat_sz)
+
+        deconvs = []
+        for i in range(len(channels_n) - 1):
+            deconvs.extend(
+                [
+                    # The key change: Replace ConvTranspose2d with Upsample + Conv2d
+                    nn.Upsample(scale_factor=2, mode="nearest"),
+                    nn.Conv2d(channels_n[i], channels_n[i + 1], kernel_size=3, padding=1),
+                    act_fn if i < len(channels_n) - 2 else nn.Sigmoid(),
+                ]
+            )
+        self.deconvs = nn.Sequential(*deconvs)
+
+    def forward(self, z):
+        x = self.act_fn(self.fc1(z))
+        x = self.act_fn(self.fc2(x))
+        x = x.view(-1, self.start_c, self.start_h, self.start_w)
+        return self.deconvs(x)
+
+
+class VAE(nn.Module):
+    def __init__(
+        self,
+        encoder_or_channel_nums: Union[nn.Module, List[int]],
+        decoder: Optional[nn.Module] = None,
+        input_size: Optional[Tuple[int, int]] = None,
+        latent_dim: int = 20,
+        h_dim: int = 128,
+        act_fn: nn.Module = nn.ReLU(),
+    ) -> None:
+        """Base class for Variational Auto-Encoder model"""
+        super().__init__()
+        if isinstance(encoder_or_channel_nums, nn.Module):
+            self.encoder, self.decoder = encoder_or_channel_nums, decoder
+        else:
+            if input_size is None:
+                raise ValueError("`input_sz` must be provided when building from channel numbers")
+            channels = encoder_or_channel_nums
+            self.encoder = Encoder(channels, latent_dim=latent_dim, input_size=input_size, h_dim=h_dim, act_fn=act_fn)
+            self.decoder = Decoder(
+                channels[::-1],
+                latent_dim=latent_dim,
+                enc_final_shape=self.encoder.final_shape,
+                h_dim=h_dim,
+                act_fn=act_fn,
+            )
+        self._init_weights()
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+
+    def reparameterize(self, mu: t.Tensor, log_var: t.Tensor) -> t.Tensor:
+        std = t.exp(0.5 * log_var)
+        eps = t.randn_like(std)
+        return mu + eps * std
+
+    def forward(self, x: t.Tensor) -> Tuple[t.Tensor, t.Tensor, t.Tensor]:
+        mu, log_var = self.encoder(x)
+        z = self.reparameterize(mu, log_var)
+        return self.decoder(z), mu, log_var
+
+    def sample(self, n, device=default_device):
+        self.eval()
+        with t.no_grad():
+            z = t.randn(n, self.encoder.latent_dim).to(device)
+            return self.decoder(z)

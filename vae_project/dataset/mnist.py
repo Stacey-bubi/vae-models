@@ -12,7 +12,7 @@ def get_dataset(
     colored: bool = True,
 ):
     "Get a transformed MNIST dataset, optionally a colored one."
-    transforms = transforms or []
+    transforms = transforms.copy() or []
     transforms.append(tfm.ToTensor())
     cls = datasets.MNIST if not colored else ColoredMNIST
     return cls(root=root, train=train, download=True, transform=tfm.Compose(transforms))

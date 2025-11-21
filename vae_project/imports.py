@@ -1,4 +1,5 @@
-import torch as t, torch.nn as nn, torch.nn.functional as F
+from typing import List, Tuple, Union, Optional, Callable
+import torch as t, torch.nn as nn, torch.nn.functional as F, torch.optim as optim
 import torchvision as tv
 from torch.utils.data import DataLoader, Dataset
 import matplotlib.pyplot as plt

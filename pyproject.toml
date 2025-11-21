@@ -23,4 +23,4 @@ default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 
 [tool.black]
-line-length = 90
+line-length = 130

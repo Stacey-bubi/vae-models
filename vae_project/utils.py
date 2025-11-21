@@ -13,3 +13,6 @@ def show_imgs(xb: t.Tensor, ax=None):
     nrow = int(xb.shape[0]**0.5)
     xb = make_grid(xb, nrow=nrow, pad_value=1)
     return show_img(xb, ax)
+
+
+default_device = t.device('cuda' if t.cuda.is_available() else 'cpu')

@@ -2498,7 +2498,7 @@ packages:
 - pypi: ./
   name: vae-project
   version: 0.1.0
-  sha256: 5eca6646230109e148cfb0544353e348575cf74ed9749f6c19c32add3498aeee
+  sha256: 09d7cbb21a4bb772ad573807deb6415e19802c9755fbdff17cdb7f82e109b61c
   requires_dist:
   - torchvision
   - matplotlib
