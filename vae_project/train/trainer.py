@@ -21,7 +21,7 @@ class Trainer:
         self._call_hook("begin_step")
         self.preds, self.mu, self.log_var = self.model(self.xb)
         self._call_hook("after_pred")
-        self.loss = self.loss_func(self.preds, self.xb, self.mu, self.log_var)
+        self.loss = self.loss_func(self.preds, self.xb, self.mu, self.log_var, getattr(self,'beta', 1))
         self._call_hook("after_loss")
         if self.model.training:
             self.loss.backward()

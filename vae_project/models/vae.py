@@ -1,6 +1,7 @@
 from ..imports import *
 from ..utils import default_device
 
+
 class Encoder(nn.Module):
     def __init__(
         self,
@@ -18,7 +19,6 @@ class Encoder(nn.Module):
             convs.extend([nn.Conv2d(channel_nums[i], channel_nums[i + 1], kernel_size=3, stride=2, padding=1), act_fn])
         self.convs = nn.Sequential(*convs)
 
-        # Calculate flattened size dynamically
         with t.no_grad():
             dummy_input = t.zeros(1, channel_nums[0], *input_size)
             self.final_shape = self.convs(dummy_input).shape
@@ -30,7 +30,7 @@ class Encoder(nn.Module):
 
     def forward(self, x: t.Tensor) -> Tuple[t.Tensor, t.Tensor]:
         x = self.convs(x)
-        x = x.view(-1, self.flat_sz)  # Flatten
+        x = x.view(-1, self.flat_sz)
         x = self.act_fn(self.fc1(x))
         return self.fc_mu(x), self.fc_log_var(x)
 
@@ -50,9 +50,7 @@ class Decoder(nn.Module):
         for i in range(len(channels_n) - 1):
             deconvs.extend(
                 [
-                    # The key change: Replace ConvTranspose2d with Upsample + Conv2d
-                    nn.Upsample(scale_factor=2, mode="nearest"),
-                    nn.Conv2d(channels_n[i], channels_n[i + 1], kernel_size=3, padding=1),
+                    nn.ConvTranspose2d(channels_n[i], channels_n[i + 1], kernel_size=3, stride=2, padding=1, output_padding=1),
                     act_fn if i < len(channels_n) - 2 else nn.Sigmoid(),
                 ]
             )
@@ -71,7 +69,7 @@ class VAE(nn.Module):
         encoder_or_channel_nums: Union[nn.Module, List[int]],
         decoder: Optional[nn.Module] = None,
         input_size: Optional[Tuple[int, int]] = None,
-        latent_dim: int = 20,
+        latent_dim: int = 64,
         h_dim: int = 128,
         act_fn: nn.Module = nn.ReLU(),
     ) -> None:
@@ -91,12 +89,12 @@ class VAE(nn.Module):
                 h_dim=h_dim,
                 act_fn=act_fn,
             )
-        self._init_weights()
+        self._init_weights(act_fn)
 
-    def _init_weights(self):
+    def _init_weights(self, act_fn):
         for m in self.modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
-                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity="relu")
+                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity=act_str(act_fn))
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
@@ -115,3 +113,8 @@ class VAE(nn.Module):
         with t.no_grad():
             z = t.randn(n, self.encoder.latent_dim).to(device)
             return self.decoder(z)
+
+
+def act_str(act_fn):
+    act_map = {nn.ReLU(): "relu", nn.LeakyReLU(): "leaky_relu"}
+    return act_map.get(act_fn, "relu")

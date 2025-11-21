@@ -37,12 +37,13 @@ class MetricsHook(BaseHook):
     """A hook to collect and plot training and validation loss."""
 
     def __init__(self):
-        self.metrics = {"train_loss": [], "val_loss": []}
+        self.metrics = {"train_loss": [], "val_loss": [], "beta": []}
         self.val_losses = []
 
     def after_step(self, trainer: Trainer):
         if trainer.model.training:
             self.metrics["train_loss"].append(trainer.loss.item())
+            self.metrics["beta"].append(getattr(trainer, "beta", 1))
         else:
             self.val_losses.append(trainer.loss.item())
 
@@ -54,6 +55,7 @@ class MetricsHook(BaseHook):
         self.val_losses = []
 
     def plot_loss(self):
+        """Plots loss function graphs."""
         plt.figure(figsize=(10, 5))
         plt.plot(self.metrics["train_loss"], label="Training Loss")
         val_points = [
@@ -66,3 +68,22 @@ class MetricsHook(BaseHook):
         plt.legend()
         plt.grid(True)
         plt.show()
+
+
+class BetaSchedulerHook(BaseHook):
+    """Schedules the beta value for KL divergence annealing."""
+
+    def __init__(self, n_steps=None, start=0.0, end=1.0):
+        self.n_steps, self.start, self.end = n_steps, start, end
+
+    def begin_fit(self, trainer):
+        self.step_count = 0
+        if self.n_steps is None:
+            self.n_steps = len(trainer.train_dl) * trainer.epochs
+        self.increment = (self.end - self.start) / self.n_steps
+        trainer.beta = self.start
+
+    def after_step(self, trainer):
+        if trainer.model.training and self.step_count < self.n_steps:
+            trainer.beta = min(self.end, trainer.beta + self.increment)
+            self.step_count += 1
