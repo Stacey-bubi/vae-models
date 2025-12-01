@@ -1,5 +1,5 @@
 [project]
-dependencies = ["torchvision", "matplotlib", "tqdm"]
+dependencies = ["torchvision", "matplotlib", "tqdm", "trackio>=0.10.0,<0.11"]
 name = "vae-project"
 requires-python = ">= 3.12"
 version = "0.1.0"

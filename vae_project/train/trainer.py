@@ -1,4 +1,3 @@
-from tqdm.auto import tqdm
 from ..imports import *
 from ..utils import default_device, to_device
 
@@ -31,17 +30,15 @@ class BaseTrainer:
         self,
         model: nn.Module,
         train_dl,
-        val_dl,
+        valid_dl,
         optim: t.optim.Optimizer,
         loss_func: Callable,
         epochs=10,
         hooks=None,
-        verbose=True,
         device=default_device,
     ):
-        self.model, self.train_dl, self.val_dl, self.opt, self.loss_func = model, train_dl, val_dl, optim, loss_func
+        self.model, self.train_dl, self.valid_dl, self.opt, self.loss_func = model, train_dl, valid_dl, optim, loss_func
         self.epochs, self.hooks = epochs, hooks if hooks else []
-        self.verbose = verbose
         self.device = device
         self.model.to(self.device)
 
@@ -58,42 +55,46 @@ class BaseTrainer:
         raise NotImplementedError
 
     def _one_batch(self):
+        """Process single batch forward, optionally with backward"""
         self.xb, self.yb = to_device(self.batch, self.device)
-        self._call_hook("begin_step")
+        self._call_hook("before_step")
         self.predict(self.xb)
         self._call_hook("after_pred")
-        self.loss = self.get_loss()
+        self.loss_t = self.get_loss()
+        self.loss = self.loss_t.item()
         self._call_hook("after_loss")
         if self.model.training:
-            self.loss.backward()
+            self.loss_t.backward()
             self._call_hook("after_backward")
             self.opt.step()
             self.opt.zero_grad()
+            self.step += 1
         self._call_hook("after_step")
 
-    def _one_epoch(self, dl, training, desc):
-        self.training = training
-        if training:
-            self.model.train()
-        else:
-            self.model.eval()
-        self.dl = dl
-        dl_iter = tqdm(self.dl, desc=desc, leave=False) if self.verbose else self.dl
-        running_loss = 0
-        for self.batch_idx, self.batch in enumerate(dl_iter):
+    def _one_epoch(self):
+        """Run single epoch"""
+        for self.batch_idx, self.batch in enumerate(self.dl):
             self._one_batch()
-            running_loss += self.loss.item()
-            if self.verbose:
-                dl_iter.set_postfix(avg_loss=f"{running_loss/(self.batch_idx+1):.4f}")
 
     def fit(self):
         """Starts the training and validation loops for the specified number of epochs."""
-        self._call_hook("begin_fit")
-        for self.epoch in tqdm(range(self.epochs)):
-            self._call_hook("begin_epoch")
-            self._one_epoch(self.train_dl, training=True, desc=f"Epoch {self.epoch+1}/{self.epochs} [Train]")
+        self.n_steps = len(self.train_dl) * self.epochs
+        self.step = 0
+        self._call_hook("before_fit")
+        for self.epoch in range(self.epochs):
+            # Train
+            self.model.train()
+            self.training, self.dl = True, self.train_dl
+            self._call_hook("before_epoch")
+            self._one_epoch()
+
+            # Validation
+            self.model.eval()
+            self.training, self.dl = False, self.valid_dl
+            self._call_hook("before_valid")
+            self._one_epoch()
             with torch.no_grad():
-                self._one_epoch(self.val_dl, training=False, desc=f"Epoch {self.epoch+1}/{self.epochs} [Valid]")
+                self._one_epoch()
             self._call_hook("after_epoch")
         self._call_hook("after_fit")
 
