@@ -87,3 +87,12 @@ class BetaSchedulerHook(BaseHook):
         if trainer.model.training and self.step_count < self.n_steps:
             trainer.beta = min(self.end, trainer.beta + self.increment)
             self.step_count += 1
+
+
+class GradClipHook(BaseHook):
+    '''Hook to clip gradient'''
+    def __init__(self, max_norm=1.0):
+        self.max_norm = max_norm
+
+    def after_backward(self, trainer):
+        nn.utils.clip_grad_norm_(trainer.model.parameters(), self.max_norm)

@@ -11,6 +11,14 @@ class Encoder(nn.Module):
         h_dim: int = 128,
         act_fn: nn.Module = nn.ReLU(),
     ) -> None:
+        """
+        Convolutional Encoder for VAE.
+
+        Args:
+            channel_nums: List of channels for conv layers, e.g., [1, 16, 32, 64].
+            latent_dim: Dimensionality of the latent space.
+            input_size: The (height, width) of the input images.
+        """
         super().__init__()
         self.act_fn, self.latent_dim, self.h_dim = act_fn, latent_dim, h_dim
 
@@ -37,6 +45,14 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     def __init__(self, channels_n, latent_dim, enc_final_shape, h_dim=128, act_fn=nn.ReLU()):
+        """
+        Convolutional Decoder for VAE.
+
+        Args:
+            channels_n: List of channels for deconv layers, typically reversed from encoder.
+            latent_dim: Dimensionality of the latent space.
+            enc_final_shape: The output shape of the encoder's conv layers.
+        """
         super().__init__()
         self.act_fn, self.latent_dim, self.h_dim = act_fn, latent_dim, h_dim
 
@@ -73,13 +89,25 @@ class VAE(nn.Module):
         h_dim: int = 128,
         act_fn: nn.Module = nn.ReLU(),
     ) -> None:
-        """Base class for Variational Auto-Encoder model"""
+        """
+        Base class for Variational Auto-Encoder model.
+
+        Can be initialized in two ways:
+        1. By passing pre-built `encoder` and `decoder` modules.
+        2. By passing a list of `channel_nums` and `input_size` to build them internally.
+
+        Args:
+            encoder_or_channel_nums: An encoder module or a list of channel numbers.
+            decoder: A decoder module (required if passing an encoder module).
+            input_size: Image (height, width), required if building from channel numbers.
+            latent_dim: Dimensionality of the latent space.
+        """
         super().__init__()
         if isinstance(encoder_or_channel_nums, nn.Module):
             self.encoder, self.decoder = encoder_or_channel_nums, decoder
         else:
             if input_size is None:
-                raise ValueError("`input_sz` must be provided when building from channel numbers")
+                raise ValueError("`input_size` must be provided when building from channel numbers")
             channels = encoder_or_channel_nums
             self.encoder = Encoder(channels, latent_dim=latent_dim, input_size=input_size, h_dim=h_dim, act_fn=act_fn)
             self.decoder = Decoder(
@@ -94,7 +122,7 @@ class VAE(nn.Module):
     def _init_weights(self, act_fn):
         for m in self.modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
-                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity=act_str(act_fn))
+                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity=act2str(act_fn))
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
@@ -115,6 +143,7 @@ class VAE(nn.Module):
             return self.decoder(z)
 
 
-def act_str(act_fn):
+def act2str(act_fn):
+    '''Returns string representation of activation function'''
     act_map = {nn.ReLU(): "relu", nn.LeakyReLU(): "leaky_relu"}
     return act_map.get(act_fn, "relu")
