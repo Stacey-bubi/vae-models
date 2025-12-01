@@ -41,7 +41,7 @@ class MetricsHook(BaseHook):
         self.val_losses = []
 
     def after_step(self, trainer: Trainer):
-        if trainer.model.training:
+        if trainer.training:
             self.metrics["train_loss"].append(trainer.loss.item())
             self.metrics["beta"].append(getattr(trainer, "beta", 1))
         else:
@@ -76,15 +76,15 @@ class BetaSchedulerHook(BaseHook):
     def __init__(self, n_steps=None, start=0.0, end=1.0):
         self.n_steps, self.start, self.end = n_steps, start, end
 
-    def begin_fit(self, trainer):
+    def begin_fit(self, trainer: Trainer):
         self.step_count = 0
         if self.n_steps is None:
             self.n_steps = len(trainer.train_dl) * trainer.epochs
         self.increment = (self.end - self.start) / self.n_steps
         trainer.beta = self.start
 
-    def after_step(self, trainer):
-        if trainer.model.training and self.step_count < self.n_steps:
+    def after_step(self, trainer: Trainer):
+        if trainer.training and self.step_count < self.n_steps:
             trainer.beta = min(self.end, trainer.beta + self.increment)
             self.step_count += 1
 
@@ -94,5 +94,5 @@ class GradClipHook(BaseHook):
     def __init__(self, max_norm=1.0):
         self.max_norm = max_norm
 
-    def after_backward(self, trainer):
+    def after_backward(self, trainer: Trainer):
         nn.utils.clip_grad_norm_(trainer.model.parameters(), self.max_norm)

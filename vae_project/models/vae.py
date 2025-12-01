@@ -120,9 +120,10 @@ class VAE(nn.Module):
         self._init_weights(act_fn)
 
     def _init_weights(self, act_fn):
+        nonlin = act2str(act_fn)
         for m in self.modules():
-            if isinstance(m, (nn.Conv2d, nn.Linear)):
-                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity=act2str(act_fn))
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight, mode="fan_in", nonlinearity=nonlin)
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
@@ -145,5 +146,5 @@ class VAE(nn.Module):
 
 def act2str(act_fn):
     '''Returns string representation of activation function'''
-    act_map = {nn.ReLU(): "relu", nn.LeakyReLU(): "leaky_relu"}
-    return act_map.get(act_fn, "relu")
+    act_map = {nn.ReLU: "relu", nn.LeakyReLU: "leaky_relu"}
+    return act_map.get(type(act_fn), "relu")

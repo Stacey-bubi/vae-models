@@ -1,4 +1,5 @@
 from typing import List, Tuple, Union, Optional, Callable
+import torch
 import torch as t, torch.nn as nn, torch.nn.functional as F, torch.optim as optim
 import torchvision as tv
 from torch.utils.data import DataLoader, Dataset

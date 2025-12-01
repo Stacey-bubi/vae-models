@@ -41,15 +41,17 @@ class ColoredMNIST(datasets.MNIST):
         img = self.colorize_fn(img, label)
         return img, label
 
+    def _colorize(self, image, hue):
+        c = t.stack([(hue-3).abs()-1, 2-(hue-2).abs(), 2-(hue-4).abs()], -1).clamp(0,1)
+        return image * c[...,None,None]
 
-    def colorize_rand(self, img: t.Tensor, label: t.Tensor):
-        "Colorizes a single-channel image with a random color."
-        c = t.rand(img.shape[0], 3, 1, 1)  # random RGB color
-        return img * c
+    def colorize_rand(self,image: t.Tensor, label=None):
+        "Colorizes a single-channel image with a random, fully-saturated color."
+        h = t.rand(1, device=image.device) * 6
+        return self._colorize(image, h)
 
 
-    def colorize_cls(self, img: t.Tensor, label: t.Tensor):
+    def colorize_cls(self, image: t.Tensor, label: t.Tensor):
         "Colorizes a single-channel image based on class label."
-        h = t.as_tensor(label, device=img.device).float()/self.n_classes*6
-        c = t.stack([(h-3).abs()-1, 2-(h-2).abs(), 2-(h-4).abs()], -1).clamp(0,1)
-        return img * c[...,None,None]
+        h = t.as_tensor(label, device=image.device).float()/self.n_classes*6
+        return self._colorize(image, h)

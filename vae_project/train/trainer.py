@@ -29,7 +29,7 @@ class BaseTrainer:
 
     def __init__(
         self,
-        model,
+        model: nn.Module,
         train_dl,
         val_dl,
         optim: t.optim.Optimizer,
@@ -49,7 +49,7 @@ class BaseTrainer:
         for hook in self.hooks:
             getattr(hook, method_name, lambda trainer: None)(self)
 
-    def get_loss(self):
+    def get_loss(self) -> torch.Tensor:
         """Calculates the loss for the current batch. Must be implemented by a subclass."""
         raise NotImplementedError
 
@@ -72,13 +72,17 @@ class BaseTrainer:
         self._call_hook("after_step")
 
     def _one_epoch(self, dl, training, desc):
-        self.model.training = training
+        self.training = training
+        if training:
+            self.model.train()
+        else:
+            self.model.eval()
         self.dl = dl
         dl_iter = tqdm(self.dl, desc=desc, leave=False) if self.verbose else self.dl
         running_loss = 0
         for self.batch_idx, self.batch in enumerate(dl_iter):
             self._one_batch()
-            running_loss += self.loss
+            running_loss += self.loss.item()
             if self.verbose:
                 dl_iter.set_postfix(avg_loss=f"{running_loss/(self.batch_idx+1):.4f}")
 
@@ -88,7 +92,7 @@ class BaseTrainer:
         for self.epoch in tqdm(range(self.epochs)):
             self._call_hook("begin_epoch")
             self._one_epoch(self.train_dl, training=True, desc=f"Epoch {self.epoch+1}/{self.epochs} [Train]")
-            with t.no_grad():
+            with torch.no_grad():
                 self._one_epoch(self.val_dl, training=False, desc=f"Epoch {self.epoch+1}/{self.epochs} [Valid]")
             self._call_hook("after_epoch")
         self._call_hook("after_fit")
@@ -110,5 +114,6 @@ class Trainer(BaseTrainer):
 
     def predict(self, xb):
         """Runs a forward pass on the VAE model and stores its outputs."""
+        xb = to_device(xb, self.device)
         self.preds, self.mu, self.log_var = self.model(xb)
         return self.preds, self.mu, self.log_var
