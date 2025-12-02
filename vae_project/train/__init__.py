@@ -1,2 +1,2 @@
-from .trainer import Trainer
+from .trainers import Trainer, TrainerIWAE
 from .hooks import *

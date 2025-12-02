@@ -2,7 +2,8 @@ from typing import Type, TypeVar
 from ..imports import *
 from ..utils import default_device, to_device
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BaseTrainer:
     """
@@ -106,6 +107,7 @@ class BaseTrainer:
                 return h
         raise KeyError(f"Hook {cls} not found")
 
+
 class Trainer(BaseTrainer):
     """VAE trainer
 
@@ -124,4 +126,46 @@ class Trainer(BaseTrainer):
         """Runs a forward pass on the VAE model and stores its outputs."""
         xb = to_device(xb, self.device)
         self.preds, self.mu, self.log_var = self.model(xb)
-        return self.preds, self.mu, self.log_var
+        return self.preds
+
+
+class TrainerIWAE(BaseTrainer):
+    """Importance-Weighted Autoencoder (IWAE) trainer.
+
+    To use this trainer, ensure your:
+    - `model` is an IWAE instance with `forward(x, K)` method.
+    - `loss_func` accepts `(recon, x, z, mu, log_var, K, beta)` arguments.
+      The `beta` value can be controlled by a hook (e.g., for beta annealing).
+      The K value should be set via the trainer's K_train and K_eval attributes.
+    """
+
+    def __init__(self, K_train: int = 5, K_eval: int = 50, **kwargs):
+        """Initialize IWAE trainer.
+
+        Args:
+            K_train: Number of importance samples during training
+            K_eval: Number of importance samples during evaluation (typically larger)
+            ... (Same as for `BaseTrainer`)
+        """
+        super().__init__(**kwargs)
+        self.K_train = K_train
+        self.K_eval = K_eval
+
+    def get_loss(self):
+        """Calculates the IWAE loss using importance weighting."""
+        return self.loss_func(
+            self.preds,
+            self.xb,
+            self.z,
+            self.mu,
+            self.log_var,
+        )
+
+    def predict(self, xb, training: bool = None):
+        """Runs a forward pass on the IWAE model with importance samples."""
+        xb = to_device(xb, self.device)
+        if training is None:
+            training = self.training
+        K = self.K_train if training else self.K_eval
+        self.preds, self.z, self.mu, self.log_var = self.model(xb, K=K)
+        return self.preds

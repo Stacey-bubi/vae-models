@@ -1,6 +1,7 @@
 from .base import BaseHook
 from .optimization import BetaSchedulerHook, GradClipHook
-from .metrics import ProgressBarHook, MetricsHook
+from .metrics import MetricsHook, VAEMetricsHook
+from .pbar import ProgressBarHook
 
 __all__ = [
     "BaseHook",
@@ -8,4 +9,5 @@ __all__ = [
     "GradClipHook",
     "ProgressBarHook",
     "MetricsHook",
+    "VAEMetricsHook",
 ]

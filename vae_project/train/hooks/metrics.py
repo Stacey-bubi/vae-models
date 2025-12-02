@@ -2,7 +2,6 @@ from collections import defaultdict
 from vae_project.imports import *
 from vae_project.train.losses import *
 from vae_project.train import Trainer
-from tqdm.auto import tqdm
 from .base import BaseHook
 
 try:
@@ -11,15 +10,22 @@ except:
     pass
 
 
-class MetricsHook(BaseHook):
-    """A hook to collect and plot training and validation loss."""
+class BaseMetricsHook(BaseHook):
+    """An abstract hook to collect, aggregate, and plot training/validation metrics."""
 
-    def __init__(self, verbose=True, recon_loss="bce",  use_trackio=False, **trackio_kwargs):
-        self.use_trackio, self.verbose, self.recon_loss = use_trackio, verbose, recon_loss
+    def __init__(self, verbose=True, use_trackio=False, **trackio_kwargs):
+        self.use_trackio, self.verbose = use_trackio, verbose
         self.metrics = defaultdict(list)
-        self.val_losses = []
         if use_trackio:
-            tio.init('vae', **trackio_kwargs)
+            try:
+                tio.init("vae", **trackio_kwargs)
+            except:
+                print("Failed to init trackio")
+                self.use_trackio = False
+
+    def _get_batch_metrics(self, trainer, prefix: str = Literal["train", "valid"]) -> dict:
+        """Subclasses MUST implement this to return a dictionary of metrics for the current step."""
+        raise NotImplementedError
 
     def before_fit(self, trainer):
         self.n_train, self.n_valid = len(trainer.train_dl), len(trainer.valid_dl)
@@ -27,29 +33,21 @@ class MetricsHook(BaseHook):
     def before_valid(self, trainer):
         self.val_batch_metrics = defaultdict(list)
 
-    def after_loss(self, trainer: Trainer):
-        data = {}
+    def after_loss(self, trainer):
         prefix = "train" if trainer.training else "valid"
-        data[f"{prefix}_kl"] = kl_loss(trainer.mu, trainer.log_var).item()
-        data[f"{prefix}_recon"] = recon_loss(trainer.preds, trainer.xb, self.recon_loss).item()
-        data[f"{prefix}_elbo"] = trainer.loss
-        data["beta"] = getattr(trainer, "beta", 1)
+        data = self._get_batch_metrics(trainer, prefix)
 
-        # for validation aggregate each epoch, then store
         metrics_dict = self.val_batch_metrics if not trainer.training else self.metrics
         for k, v in data.items():
             metrics_dict[k].append(v)
-
         if self.use_trackio:
             tio.log(data, trainer.step)
 
-    def after_epoch(self, trainer: Trainer):
-        # store validation metrics
+    def after_epoch(self, trainer):
         for k, v in self.val_batch_metrics.items():
             self.metrics[k].append(np.mean(v))
-
-        train_loss = np.mean(self.metrics["train_elbo"][-self.n_train :])
-        val_loss = self.metrics["valid_elbo"][-1]
+        train_loss = np.mean(self.metrics["train_loss"][-self.n_train :])
+        val_loss = self.metrics["valid_loss"][-1]
         if self.verbose:
             print(f"Epoch {trainer.epoch+1}/{trainer.epochs} | Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f}")
 
@@ -58,18 +56,21 @@ class MetricsHook(BaseHook):
             tio.finish()
 
     def plot_loss(self, axes=None):
-        """Plots graphs for ELBO, KL, and Reconstruction losses."""
-        metrics_to_plot = ["elbo", "kl", "recon"]
-        if not axes:
-            axes = plt.subplots(len(metrics_to_plot), 1, figsize=(8, 4 * len(metrics_to_plot)))[1]
-        if len(metrics_to_plot) == 1:
-            axes = [axes]
+        """Plots graphs for all available metrics (e.g., loss, kl, recon)."""
+        train_keys = sorted([k for k in self.metrics if k.startswith("train_")])
+        metrics_to_plot = [k.replace("train_", "") for k in train_keys]
 
-        for ax, m in zip(axes, metrics_to_plot):
+        if not axes:
+            _, axes = plt.subplots(len(metrics_to_plot), 1, figsize=(8, 4 * len(metrics_to_plot)), squeeze=False)
+        axes = axes.flatten()
+
+        for i, m in enumerate(metrics_to_plot):
+            ax = axes[i]
             ax.plot(self.metrics[f"train_{m}"], label=f"Train {m.title()}")
-            val_x = np.arange(1, len(self.metrics[f"valid_{m}"]) + 1) * self.n_train - 1
-            ax.plot(val_x, self.metrics[f"valid_{m}"], "o-", label=f"Valid {m.title()}")
-            ax.set_title(f"{m.title()}")
+            if f"valid_{m}" in self.metrics:
+                val_x = np.arange(1, len(self.metrics[f"valid_{m}"]) + 1) * self.n_train - 1
+                ax.plot(val_x, self.metrics[f"valid_{m}"], "o-", label=f"Valid {m.title()}")
+            ax.set_title(m.replace("_", " ").title())
             ax.legend()
             ax.grid(True)
 
@@ -78,26 +79,25 @@ class MetricsHook(BaseHook):
         plt.show()
 
 
-class ProgressBarHook(BaseHook):
-    """A hook to display progress bars for epochs and batches."""
+class MetricsHook(BaseMetricsHook):
+    """Metrics hook that only logs the total loss."""
 
-    def before_fit(self, trainer: Trainer):
-        self.epoch_bar = tqdm(range(trainer.epochs), desc="Epoch")
+    def _get_batch_metrics(self, trainer, prefix: str) -> dict:
+        return {f"{prefix}_loss": trainer.loss}
 
-    def before_epoch(self, trainer: Trainer):
-        self.losses = []
-        trainer.dl = self.bar = tqdm(trainer.dl, desc=f"Epoch {trainer.epoch+1}/{trainer.epochs} [Train]", leave=False)
 
-    def before_valid(self, trainer: Trainer):
-        self.losses = []
-        trainer.dl = self.bar = tqdm(trainer.dl, desc=f"Epoch {trainer.epoch+1}/{trainer.epochs} [Valid]", leave=False)
+class VAEMetricsHook(MetricsHook):
+    """Metrics hook for standard VAEs that logs reconstruction and KL terms."""
 
-    def after_step(self, trainer: Trainer):
-        self.losses.append(trainer.loss)
-        self.bar.set_postfix(loss=f"{np.mean(self.losses):.4f}")
+    def __init__(self, recon_loss_fn="bce", **kwargs):
+        super().__init__(**kwargs)
+        self.recon_loss_fn = recon_loss_fn
 
-    def after_epoch(self, trainer: Trainer):
-        self.epoch_bar.update(1)
-
-    def after_fit(self, _):
-        self.epoch_bar.close()
+    def _get_batch_metrics(self, trainer, prefix: str) -> dict:
+        data = super()._get_batch_metrics()
+        return {
+            **data,
+            f"{prefix}_kl": kl_loss(trainer.mu, trainer.log_var).item(),
+            f"{prefix}_recon": recon_loss(trainer.preds, trainer.xb, self.recon_loss_fn).item(),
+            "beta": getattr(trainer, "beta", 1.0),
+        }

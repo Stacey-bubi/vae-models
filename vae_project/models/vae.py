@@ -135,6 +135,15 @@ class VAE(nn.Module):
                     nn.init.zeros_(m.bias)
 
     def reparameterize(self, mu: t.Tensor, log_var: t.Tensor) -> t.Tensor:
+        """Reparameterization trick.
+        
+        Args:
+            mu: Mean of the posterior q(z|x), shape [batch_size, latent_dim]
+            log_var: Log variance of the posterior, shape [batch_size, latent_dim]
+            
+        Returns:
+            z: Sampled latent codes of shape [batch_size, latent_dim]
+        """
         std = t.exp(0.5 * log_var)
         eps = t.randn_like(std)
         return mu + eps * std
