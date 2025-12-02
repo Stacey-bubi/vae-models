@@ -61,7 +61,7 @@ class MetricsHook(BaseHook):
         """Plots graphs for ELBO, KL, and Reconstruction losses."""
         metrics_to_plot = ["elbo", "kl", "recon"]
         if not axes:
-            axes = plt.subplots(len(metrics_to_plot), 1, figsize=(10, 4 * len(metrics_to_plot)))[1]
+            axes = plt.subplots(len(metrics_to_plot), 1, figsize=(8, 4 * len(metrics_to_plot)))[1]
         if len(metrics_to_plot) == 1:
             axes = [axes]
 

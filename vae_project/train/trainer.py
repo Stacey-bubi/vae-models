@@ -1,6 +1,8 @@
+from typing import Type, TypeVar
 from ..imports import *
 from ..utils import default_device, to_device
 
+T = TypeVar('T')
 
 class BaseTrainer:
     """
@@ -98,6 +100,11 @@ class BaseTrainer:
             self._call_hook("after_epoch")
         self._call_hook("after_fit")
 
+    def get_hook(self, cls: Type[T]) -> T:
+        for h in self.hooks:
+            if isinstance(h, cls):
+                return h
+        raise KeyError(f"Hook {cls} not found")
 
 class Trainer(BaseTrainer):
     """VAE trainer

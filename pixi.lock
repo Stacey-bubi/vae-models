@@ -42,13 +42,13 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/04/5f/9ff93450ba96b09c7c2b3f81c94de31c89f92292f1380261bd7195bea4ea/contourpy-1.3.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/c9/56/e7e69b427c3878352c2fb9b450bd0e19ed552753491d39d7d0a2f5226d41/cryptography-46.0.3-cp311-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/17/17/62c82beab6536ea72576f90b84a3dbe6bcceb88d3d46afc4d05c376f0231/fastapi-0.123.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/bc/e9/1c266c3c6aeaab86b5f7b2d7bd3e3789ddc6780c0a4236d24d92814628f1/fastapi-0.123.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/55/56/dd3669eccebb6d8ac81e624542ebd53fe6f08e1b8f2f8d50aeb7e3b83f99/ffmpy-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/76/91/7216b27286936c16f5b4d0c530087e4a54eead683e6b0b73dd0c64844af6/filelock-3.20.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/24/b0/f442e90fde5d2af2ae0cb54008ab6411edc557ee33b824e13e1d04925ac9/fonttools-4.61.0-cp314-cp314-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/eb/02/a6b21098b1d5d6249b7c5ab69dde30108a71e4e819d4a9778f1de1d5b70d/fsspec-2025.10.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/09/21/27ae5f4b2191a5d58707fc610e67453781a2b948a675a7cf06c99497ffa1/gradio-6.0.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/07/5b/789403564754f1eba0273400c1cea2c155f984d82458279154977a088509/gradio_client-2.0.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/1c/b0/d4bb7a5c9c2e26a952da06f046c6411fb8678003a0b9c7ed379941aff21f/gradio-6.0.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/1b/11/d680ecf4073bd1cacfe9dea57fa95660e4ea2d1fff3125dbaaa902cc9095/gradio_client-2.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/28/27/3d6dcadc8a3214d8522c1e7f6a19554e33659be44546d44a2f7572ac7d2a/groovy-0.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9a/92/cf3ab0b652b082e66876d08da57fcc6fa2f0e6c70dfbbafbd470bb73eb47/hf_xet-1.2.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -179,7 +179,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/be/86/b9e38c4c39a06e4e6065b2dfb5dd4836a306411dbb0559d6c3910884caab/execnb-0.1.15-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/17/17/62c82beab6536ea72576f90b84a3dbe6bcceb88d3d46afc4d05c376f0231/fastapi-0.123.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/bc/e9/1c266c3c6aeaab86b5f7b2d7bd3e3789ddc6780c0a4236d24d92814628f1/fastapi-0.123.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/27/f4/30077733807ca57cc504a6faadcdd067714a7891dad66231b0c1ab373551/fastcore-1.8.16-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/a8/20d0723294217e47de6d9e2e40fd4a9d2f7c4b6ef974babd482a59743694/fastjsonschema-2.21.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/55/56/dd3669eccebb6d8ac81e624542ebd53fe6f08e1b8f2f8d50aeb7e3b83f99/ffmpy-1.0.0-py3-none-any.whl
@@ -188,8 +188,8 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cf/58/8acf1b3e91c58313ce5cb67df61001fc9dcd21be4fadb76c1a2d540e09ed/fqdn-1.5.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/eb/02/a6b21098b1d5d6249b7c5ab69dde30108a71e4e819d4a9778f1de1d5b70d/fsspec-2025.10.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/df/cd/63129b50c44da8461f663f09f8e4801acaf0ff5bc8b201d75cee82d5b35c/ghapi-1.0.8-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/09/21/27ae5f4b2191a5d58707fc610e67453781a2b948a675a7cf06c99497ffa1/gradio-6.0.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/07/5b/789403564754f1eba0273400c1cea2c155f984d82458279154977a088509/gradio_client-2.0.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/1c/b0/d4bb7a5c9c2e26a952da06f046c6411fb8678003a0b9c7ed379941aff21f/gradio-6.0.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/1b/11/d680ecf4073bd1cacfe9dea57fa95660e4ea2d1fff3125dbaaa902cc9095/gradio_client-2.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/28/27/3d6dcadc8a3214d8522c1e7f6a19554e33659be44546d44a2f7572ac7d2a/groovy-0.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9a/92/cf3ab0b652b082e66876d08da57fcc6fa2f0e6c70dfbbafbd470bb73eb47/hf_xet-1.2.0-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -276,6 +276,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4c/d2/ef2074dc020dd6e109611a8be4449b98cd25e1b9b8a303c2f0fca2f2bcf7/pydantic_core-2.41.5-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/a6/53/d78dc063216e62fc55f6b2eebb447f6a4b0a59f55c8406376f76bf959b08/pydub-0.25.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ba/8c/c9b0081c0e52789a910390ce44e54c1318999d74386f15d92d0deb522aff/pyinstrument-5.1.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/10/5e/1aa9a93198c6b64513c9d7752de7422c06402de6600a8767da1524f9570b/pyparsing-3.2.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bd/24/12818598c362d7f300f18e74db45963dbcb85150324092410c8b49405e42/pyproject_hooks-1.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl
@@ -688,10 +689,10 @@ packages:
   - littleutils ; extra == 'tests'
   - rich ; python_full_version >= '3.11' and extra == 'tests'
   requires_python: '>=3.8'
-- pypi: https://files.pythonhosted.org/packages/17/17/62c82beab6536ea72576f90b84a3dbe6bcceb88d3d46afc4d05c376f0231/fastapi-0.123.0-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/bc/e9/1c266c3c6aeaab86b5f7b2d7bd3e3789ddc6780c0a4236d24d92814628f1/fastapi-0.123.4-py3-none-any.whl
   name: fastapi
-  version: 0.123.0
-  sha256: cb56e69e874afa897bd3416c8a3dbfdae1730d0a308d4c63303f3f4b44136ae4
+  version: 0.123.4
+  sha256: fc2b5cbc10fa05f4f22d87ef7ebc8993b5110ffd9850c08e1fc35a0da37f492e
   requires_dist:
   - starlette>=0.40.0,<0.51.0
   - pydantic>=1.7.4,!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0
@@ -927,10 +928,10 @@ packages:
   - pysymbol-llm ; extra == 'dev'
   - llms-txt ; extra == 'dev'
   requires_python: '>=3.7'
-- pypi: https://files.pythonhosted.org/packages/09/21/27ae5f4b2191a5d58707fc610e67453781a2b948a675a7cf06c99497ffa1/gradio-6.0.1-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/1c/b0/d4bb7a5c9c2e26a952da06f046c6411fb8678003a0b9c7ed379941aff21f/gradio-6.0.2-py3-none-any.whl
   name: gradio
-  version: 6.0.1
-  sha256: 0f98dc8b414a3f3773cbf3caf5a354507c8ae309ed8266e2f30ca9fa53f379b8
+  version: 6.0.2
+  sha256: bcb8b9d147b313c958f811977527415cfd7871ee9547ccd92ef1911970c49a2c
   requires_dist:
   - aiofiles>=22.0,<25.0
   - anyio>=3.0,<5.0
@@ -938,7 +939,7 @@ packages:
   - brotli>=1.1.0
   - fastapi>=0.115.2,<1.0
   - ffmpy
-  - gradio-client==2.0.0
+  - gradio-client==2.0.1
   - groovy~=0.1
   - httpx>=0.24.1,<1.0
   - huggingface-hub>=0.33.5,<2.0
@@ -965,10 +966,10 @@ packages:
   - authlib ; extra == 'oauth'
   - itsdangerous ; extra == 'oauth'
   requires_python: '>=3.10'
-- pypi: https://files.pythonhosted.org/packages/07/5b/789403564754f1eba0273400c1cea2c155f984d82458279154977a088509/gradio_client-2.0.0-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/1b/11/d680ecf4073bd1cacfe9dea57fa95660e4ea2d1fff3125dbaaa902cc9095/gradio_client-2.0.1-py3-none-any.whl
   name: gradio-client
-  version: 2.0.0
-  sha256: 77bedf20edcc232d8e7986c1a22165b2bbca1c7c7df10ba808a093d5180dae18
+  version: 2.0.1
+  sha256: 6322eecb5963a07703306c0b048bb98518063d05ca99a65fe384417188af8c63
   requires_dist:
   - fsspec
   - httpx>=0.24.1
@@ -2568,6 +2569,30 @@ packages:
   requires_dist:
   - colorama>=0.4.6 ; extra == 'windows-terminal'
   requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/ba/8c/c9b0081c0e52789a910390ce44e54c1318999d74386f15d92d0deb522aff/pyinstrument-5.1.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+  name: pyinstrument
+  version: 5.1.1
+  sha256: bc5b87b1e27bec94457fed8d03c755a3c09edb4f35d975dbdffd77d863173254
+  requires_dist:
+  - pytest ; extra == 'test'
+  - flaky ; extra == 'test'
+  - trio ; extra == 'test'
+  - cffi>=1.17.0 ; extra == 'test'
+  - greenlet>=3 ; extra == 'test'
+  - pytest-asyncio==0.23.8 ; extra == 'test'
+  - ipython ; extra == 'test'
+  - click ; extra == 'bin'
+  - nox ; extra == 'bin'
+  - sphinx==7.4.7 ; extra == 'docs'
+  - myst-parser==3.0.1 ; extra == 'docs'
+  - furo==2024.7.18 ; extra == 'docs'
+  - sphinxcontrib-programoutput==0.17 ; extra == 'docs'
+  - sphinx-autobuild==2024.4.16 ; extra == 'docs'
+  - numpy ; extra == 'examples'
+  - django ; extra == 'examples'
+  - litestar ; extra == 'examples'
+  - typing-extensions ; extra == 'types'
+  requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/10/5e/1aa9a93198c6b64513c9d7752de7422c06402de6600a8767da1524f9570b/pyparsing-3.2.5-py3-none-any.whl
   name: pyparsing
   version: 3.2.5
@@ -3165,7 +3190,7 @@ packages:
 - pypi: ./
   name: vae-project
   version: 0.1.0
-  sha256: b4575b69a67adfdd9e03e04ecd8a78211a7f784e072a2afbb13a10a5884532ef
+  sha256: 2877b60aa03863c34289d95a4a273e91a770508a0805770e3fff43e965cc46e3
   requires_dist:
   - torchvision
   - matplotlib
@@ -3175,6 +3200,7 @@ packages:
   - ipywidgets ; extra == 'dev'
   - jupyter ; extra == 'dev'
   - black ; extra == 'dev'
+  - pyinstrument ; extra == 'dev'
   requires_python: '>=3.12'
   editable: true
 - pypi: https://files.pythonhosted.org/packages/b5/e8/dbf020b4d98251a9860752a094d09a65e1b436ad181faf929983f697048f/watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl
@@ -3231,6 +3257,7 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libzlib >=1.3.1,<2.0a0
   license: BSD-3-Clause
+  license_family: BSD
   purls: []
   size: 550303
   timestamp: 1764566784586

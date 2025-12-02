@@ -44,7 +44,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, channels_n, latent_dim, enc_final_shape, h_dim=128, act_fn=nn.ReLU()):
+    def __init__(self, channels_n, latent_dim, enc_final_shape, h_dim=128, act_fn=nn.ReLU(), out_act=nn.Sigmoid()):
         """
         Convolutional Decoder for VAE.
 
@@ -67,7 +67,7 @@ class Decoder(nn.Module):
             deconvs.extend(
                 [
                     nn.ConvTranspose2d(channels_n[i], channels_n[i + 1], kernel_size=3, stride=2, padding=1, output_padding=1),
-                    act_fn if i < len(channels_n) - 2 else nn.Sigmoid(),
+                    act_fn if i < len(channels_n) - 2 else out_act,
                 ]
             )
         self.deconvs = nn.Sequential(*deconvs)
@@ -88,6 +88,8 @@ class VAE(nn.Module):
         latent_dim: int = 64,
         h_dim: int = 128,
         act_fn: nn.Module = nn.ReLU(),
+        out_act: nn.Module = nn.Sigmoid(),
+        normalize: bool = False
     ) -> None:
         """
         Base class for Variational Auto-Encoder model.
@@ -99,10 +101,13 @@ class VAE(nn.Module):
         Args:
             encoder_or_channel_nums: An encoder module or a list of channel numbers.
             decoder: A decoder module (required if passing an encoder module).
-            input_size: Image (height, width), required if building from channel numbers.
-            latent_dim: Dimensionality of the latent space.
+            input_size (int): Image (height, width), required if building from channel numbers.
+            latent_dim (int): Dimensionality of the latent space.
+            out_act: Activation function after final layer
+            normalize (bool): Whether to normalize inputs to [-1,1]
         """
         super().__init__()
+        self.normalize = normalize
         if isinstance(encoder_or_channel_nums, nn.Module):
             self.encoder, self.decoder = encoder_or_channel_nums, decoder
         else:
@@ -116,7 +121,9 @@ class VAE(nn.Module):
                 enc_final_shape=self.encoder.final_shape,
                 h_dim=h_dim,
                 act_fn=act_fn,
+                out_act=out_act
             )
+        
         self._init_weights(act_fn)
 
     def _init_weights(self, act_fn):
@@ -133,6 +140,7 @@ class VAE(nn.Module):
         return mu + eps * std
 
     def forward(self, x: t.Tensor) -> Tuple[t.Tensor, t.Tensor, t.Tensor]:
+        if self.normalize: x = 2*x-1
         mu, log_var = self.encoder(x)
         z = self.reparameterize(mu, log_var)
         return self.decoder(z), mu, log_var
@@ -145,6 +153,6 @@ class VAE(nn.Module):
 
 
 def act2str(act_fn):
-    '''Returns string representation of activation function'''
+    """Returns string representation of activation function"""
     act_map = {nn.ReLU: "relu", nn.LeakyReLU: "leaky_relu"}
     return act_map.get(type(act_fn), "relu")

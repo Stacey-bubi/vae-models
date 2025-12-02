@@ -3,7 +3,13 @@ dependencies = ["torchvision", "matplotlib", "tqdm", "trackio>=0.10.0,<0.11"]
 name = "vae-project"
 requires-python = ">= 3.12"
 version = "0.1.0"
-optional-dependencies = { dev = ["nbdev", "ipywidgets", "jupyter", "black"] }
+optional-dependencies = { dev = [
+    "nbdev",
+    "ipywidgets",
+    "jupyter",
+    "black",
+    "pyinstrument",
+] }
 
 [build-system]
 build-backend = "hatchling.build"

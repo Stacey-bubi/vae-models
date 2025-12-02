@@ -3,6 +3,12 @@ from torchvision.utils import make_grid
 from .imports import *
 
 
+def normalize_img(x: t.Tensor):
+    '''Normalizes image to 0-1 range'''
+    if x.min() >= 0 and x.max() <=1:
+        return x
+    return (x-x.min())/(x.max()-x.min())
+
 def show_img(x: t.Tensor, ax=None):
     """Displays a single image tensor of shape (C, H, W)."""
     if ax is None:
@@ -38,3 +44,8 @@ def random_seed(n=42):
     np.random.seed(n)
     torch.manual_seed(n)
     torch.cuda.manual_seed(n)
+
+
+def noop(x):
+    '''returns input'''
+    return x
