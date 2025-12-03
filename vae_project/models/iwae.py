@@ -44,6 +44,6 @@ class IWAE(VAE):
         mu, log_var = self.encoder(x)
         
         z = self.reparameterize(mu, log_var, K)
-        recon = self.decoder(z.view(bs * K, -1))
+        recon = self.decode(z.view(bs * K, -1))
 
         return recon.view(bs, K, *recon.shape[1:]), z, mu, log_var

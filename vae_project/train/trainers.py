@@ -1,4 +1,6 @@
 from typing import Type, TypeVar
+
+from vae_project.train.losses import iwae_loss
 from ..imports import *
 from ..utils import default_device, to_device
 
@@ -35,7 +37,7 @@ class BaseTrainer:
         train_dl,
         valid_dl,
         optim: t.optim.Optimizer,
-        loss_func: Callable,
+        loss_func: Callable = None,
         epochs=10,
         hooks=None,
         device=default_device,
@@ -120,7 +122,7 @@ class Trainer(BaseTrainer):
 
     def get_loss(self):
         """Calculates the VAE loss, combining reconstruction and KL divergence."""
-        return self.loss_func(self.preds, self.xb, self.mu, self.log_var, getattr(self, "beta", 1))
+        return self.loss_func(self.preds, self.xb, self.mu, self.log_var, getattr(self, "beta", 1), self.model.recon_dist)
 
     def predict(self, xb):
         """Runs a forward pass on the VAE model and stores its outputs."""
@@ -150,16 +152,12 @@ class TrainerIWAE(BaseTrainer):
         super().__init__(**kwargs)
         self.K_train = K_train
         self.K_eval = K_eval
+        if self.loss_func is None:
+            self.loss_func = iwae_loss
 
     def get_loss(self):
         """Calculates the IWAE loss using importance weighting."""
-        return self.loss_func(
-            self.preds,
-            self.xb,
-            self.z,
-            self.mu,
-            self.log_var,
-        )
+        return self.loss_func(self.preds, self.xb, self.z, self.mu, self.log_var, getattr(self, "beta", 1), self.model.recon_dist)
 
     def predict(self, xb, training: bool = None):
         """Runs a forward pass on the IWAE model with importance samples."""

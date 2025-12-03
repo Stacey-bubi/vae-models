@@ -94,7 +94,7 @@ class VAEMetricsHook(MetricsHook):
         self.recon_loss_fn = recon_loss_fn
 
     def _get_batch_metrics(self, trainer, prefix: str) -> dict:
-        data = super()._get_batch_metrics()
+        data = super()._get_batch_metrics(trainer, prefix)
         return {
             **data,
             f"{prefix}_kl": kl_loss(trainer.mu, trainer.log_var).item(),

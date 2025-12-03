@@ -28,7 +28,9 @@ def elbo_loss(recon_x: t.Tensor, x: t.Tensor, mu: t.Tensor, log_var: t.Tensor, b
     return recon_loss(recon_x, x, recon) + beta * kl_loss(mu, log_var)
 
 
-def iwae_loss(recon_xs: t.Tensor, x: t.Tensor, z: t.Tensor, mu: t.Tensor, log_var: t.Tensor, recon: str = "bce") -> t.Tensor:
+def iwae_loss(
+    recon_xs: t.Tensor, x: t.Tensor, z: t.Tensor, mu: t.Tensor, log_var: t.Tensor, beta: float = 1.0, recon: str = "bce"
+) -> t.Tensor:
     """Computes the IWAE loss, which is the negative of the IWAE log-likelihood bound."""
     B, K = z.shape[:2]
 
@@ -48,7 +50,7 @@ def iwae_loss(recon_xs: t.Tensor, x: t.Tensor, z: t.Tensor, mu: t.Tensor, log_va
     mu_exp, log_var_exp = mu.unsqueeze(1), log_var.unsqueeze(1)
     log_q_z_x = -0.5 * (((z - mu_exp) ** 2 / log_var_exp.exp()) + log_var_exp).sum(-1)
 
-    log_w = log_p_x_z + log_p_z - log_q_z_x  # Shape: [B, K]
+    log_w = log_p_x_z + beta * (log_p_z - log_q_z_x)  # Shape: [B, K]
 
     # Log-sum-exp trick
     log_w_max = log_w.max(dim=1, keepdim=True).values
