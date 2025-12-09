@@ -76,3 +76,15 @@ class Decoder(nn.Module):
         x = self.act_fn(self.fc2(x))
         x = x.view(-1, self.start_c, self.start_h, self.start_w)
         return self.deconvs(x)
+
+
+class SpectralNormDecoder(Decoder):
+    def __init__(self, channels_n, latent_dim, enc_final_shape, h_dim=128, act_fn=nn.ReLU()):
+        super().__init__(channels_n, latent_dim, enc_final_shape, h_dim, act_fn)
+
+        deconvs = []
+        for layer in self.deconvs:
+            if isinstance(layer, (nn.ConvTranspose2d, nn.Linear)):
+                layer = nn.utils.spectral_norm(layer)
+            deconvs.append(layer)
+        self.deconvs = nn.Sequential(*deconvs)

@@ -1,6 +1,6 @@
 from typing import Type, TypeVar
 
-from vae_project.train.losses import iwae_loss
+from vae_project.train.losses import elbo_loss, iwae_loss
 from ..imports import *
 from ..utils import default_device, to_device
 
@@ -97,7 +97,6 @@ class BaseTrainer:
             self.model.eval()
             self.training, self.dl = False, self.valid_dl
             self._call_hook("before_valid")
-            self._one_epoch()
             with torch.no_grad():
                 self._one_epoch()
             self._call_hook("after_epoch")
@@ -122,6 +121,8 @@ class Trainer(BaseTrainer):
 
     def get_loss(self):
         """Calculates the VAE loss, combining reconstruction and KL divergence."""
+        if self.loss_func is None:
+            self.loss_func = elbo_loss
         return self.loss_func(self.preds, self.xb, self.mu, self.log_var, getattr(self, "beta", 1), self.model.recon_dist)
 
     def predict(self, xb):
