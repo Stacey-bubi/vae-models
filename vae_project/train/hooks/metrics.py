@@ -55,7 +55,7 @@ class BaseMetricsHook(BaseHook):
         if self.use_trackio:
             tio.finish()
 
-    def plot_loss(self, axes=None):
+    def plot_loss(self, axes=None, from_step: int=0):
         """Plots graphs for all available metrics (e.g., loss, kl, recon)."""
         train_keys = sorted([k for k in self.metrics if k.startswith("train_")])
         metrics_to_plot = [k.replace("train_", "") for k in train_keys]
@@ -66,17 +66,20 @@ class BaseMetricsHook(BaseHook):
 
         for i, m in enumerate(metrics_to_plot):
             ax = axes[i]
-            ax.plot(self.metrics[f"train_{m}"], label=f"Train {m.title()}")
+            data = self.metrics[f"train_{m}"]
+            ax.plot(list(range(from_step, len(data))), data[from_step:], label=f"Train {m.title()}")
             if f"valid_{m}" in self.metrics:
-                val_x = np.arange(1, len(self.metrics[f"valid_{m}"]) + 1) * self.n_train - 1
-                ax.plot(val_x, self.metrics[f"valid_{m}"], "o-", label=f"Valid {m.title()}")
+                epoch_from_step = from_step //self.n_train
+                data = self.metrics[f"valid_{m}"]
+                val_x = np.arange(1, len(data) + 1) * self.n_train - 1
+                ax.plot(val_x[epoch_from_step:], data[epoch_from_step:], "o-", label=f"Valid {m.title()}")
             ax.set_title(m.replace("_", " ").title())
             ax.legend()
             ax.grid(True)
 
         axes[-1].set_xlabel("Batch / Step")
         plt.tight_layout()
-        plt.show()
+        return axes
 
 
 class MetricsHook(BaseMetricsHook):

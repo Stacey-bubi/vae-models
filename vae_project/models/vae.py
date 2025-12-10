@@ -96,54 +96,6 @@ class VAE(nn.Module):
         "Log probability of z under a standard Normal prior."
         return Normal(0, 1).log_prob(z).sum(dim=-1)
 
-    def langevin_sample(self, n: int = 1, n_steps: int = 10, eps: float | tuple = 1e-3, recon_std=0.1, device=default_device):
-        """
-        Refines samples from the model's joint distribution p(x, z) using Langevin dynamics.
-
-        Args:
-            n (int): Number of samples to generate.
-            n_steps (int): Number of MCMC refinement steps.
-            eps (float or tuple): Step size for x and z. If float, same is used for both.
-            recon_std (float): Std deviation of the reconstruction distribution p(x|z).
-            device (str): The device to perform computation on.
-
-        Returns:
-            Tensor: A tensor of refined samples of shape [n, C, H, W].
-        """
-        self.eval()
-        self.to(device)
-        is_bce = self.recon_dist == "bce"
-
-        eps_x, eps_z = (eps, eps) if isinstance(eps, (float, int)) else eps
-
-        z = t.randn(n, self.decoder.latent_dim, device=device, requires_grad=True)
-        with t.no_grad():
-            x: t.Tensor = self.decode(z).detach()
-        x.requires_grad = True
-
-        for i in range(n_steps):
-            # These are logits if BCE
-            recon_mu = self.decoder(z)
-
-            # log p(x|z)
-            log_p_x_given_z = recon_log_prob(recon_mu, x, recon_std, self.recon_dist)
-            log_p = log_p_x_given_z + self.log_prior(z).sum()
-
-            self.zero_grad()
-            log_p.backward()
-
-            with t.no_grad():
-                x.data += 0.5 * eps_x**2 * x.grad + eps_x * t.randn_like(x)
-                z.data += 0.5 * eps_z**2 * z.grad + eps_z * t.randn_like(z)
-                # make sure that target x is always in correct range
-                if is_bce:
-                    x.data.clamp_(0, 1)
-
-            x.grad.zero_()
-            z.grad.zero_()
-
-        return x.detach()
-
 
 def act2str(act_fn):
     """Returns string representation of activation function"""
