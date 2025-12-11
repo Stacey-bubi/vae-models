@@ -16,7 +16,7 @@
 | n_steps  | FID (↓)   | KID Mean (↓) |
 | -------- | --------- | ------------ |
 | 0        | 18.78     | 0.00870      |
-| 5        | **18.40** | **0.00869**  |
+| **5**    | **18.40** | **0.00869**  |
 | 10       | 18.43     | 0.00892      |
 | 20       | 19.06     | 0.00936      |
 | 50       | 20.97     | 0.01052      |
@@ -39,7 +39,7 @@
 
 ### **Analysis and Conclusions**
 
-From the experiments with Langevin dynamics (step size 0.001, noise scale 1), we draw a few conclusions:
+From the experiments with Langevin dynamics (step size 0.005, noise scale 1), we draw a few conclusions:
 
 1. **Effect of Steps (`n_steps`)**:
 
