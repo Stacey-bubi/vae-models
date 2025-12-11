@@ -5,7 +5,7 @@ import os
 from torchvision.utils import make_grid, save_image
 from ..imports import *
 from ..utils import default_device, to_device
-from .losses import vamp_prior_elbo_loss
+from .losses import vamp_prior_elbo_loss, iwae_loss, elbo_loss
 
 T = TypeVar("T")
 
