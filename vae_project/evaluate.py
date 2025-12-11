@@ -1,6 +1,5 @@
 import torch_fidelity
 from .models import VAE
-from .dataset.mnist import ColoredMNIST
 from .imports import *
 from .utils import default_device
 
@@ -18,7 +17,7 @@ class Generator(nn.Module):
 
 
 def evaluate_model(
-    model: VAE, dataset: ColoredMNIST, n_samples: int = 2_000, fid=True, isc=True, kid=True, verbose=True, device=default_device
+    model: VAE, dataset, n_samples: int = 2_000, fid=True, isc=True, kid=True, verbose=True, device=default_device
 ):
     """Evaluates generation quality of a model"""
     gen = Generator(model)
@@ -30,6 +29,22 @@ def evaluate_model(
         input1=wrapped_generator,
         input1_model_num_samples=n_samples,
         input2=dataset,
+        cuda=True if device.type == "cuda" else False,
+        isc=isc,
+        fid=fid,
+        kid=kid,
+        verbose=verbose,
+    )
+    return metrics_dict
+
+
+def evaluate_reconstructions(
+    target_dataset: Dataset, recon_dataset: Dataset, fid=True, isc=False, kid=True, verbose=True, device=default_device
+):
+    '''Evaluates quality of reconstructions'''
+    metrics_dict = torch_fidelity.calculate_metrics(
+        input1=target_dataset,
+        input2=recon_dataset,
         cuda=True if device.type == "cuda" else False,
         isc=isc,
         fid=fid,

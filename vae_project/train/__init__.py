@@ -1,2 +1,2 @@
-from .trainers import Trainer, TrainerIWAE, VampPriorTrainer, VampPriorHook
+from .trainers import Trainer, TrainerIWAE, VampPriorTrainer
 from .hooks import *

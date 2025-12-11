@@ -19,7 +19,7 @@ class Encoder(nn.Module):
             input_size: The (height, width) of the input images.
         """
         super().__init__()
-        self.act_fn, self.latent_dim, self.h_dim = act_fn, latent_dim, h_dim
+        self.channel_nums, self.act_fn, self.latent_dim, self.h_dim = channel_nums, act_fn, latent_dim, h_dim
 
         convs = []
         for i in range(len(channel_nums) - 1):
