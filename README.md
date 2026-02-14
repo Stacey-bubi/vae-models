@@ -1,6 +1,7 @@
 # vae-project
+![](/notebooks/langevin.gif)
 
-Skoltech project on Variational Autoencoders (VAEs) - a machine learning technique for learning compressed representations of data. This project includes implementations for Colored MNIST dataset.
+Project on Variational Autoencoders (VAEs) - a machine learning technique for learning compressed representations of data. This project includes implementations for Colored MNIST dataset.
 
 ## Quick Start
 
