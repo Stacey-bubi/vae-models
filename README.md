@@ -1,57 +1,66 @@
-# vae-project
-![](/notebooks/langevin.gif)
+# vae-models
 
-Project on Variational Autoencoders (VAEs) - a machine learning technique for learning compressed representations of data. This project includes implementations for Colored MNIST dataset.
+How three variational autoencoders — **VAE, IWAE, and VampPrior** — structure their latent spaces, and how that geometry affects sampling and interpolation. PyTorch, Colored MNIST. Group project for *Bayesian Methods of Machine Learning* (2025).
 
-## Quick Start
+![Langevin latent refinement](notebooks/langevin.gif)
 
-### 1. Get the code
+## Models
 
-Download this project to your computer:
+- **VAE** (Kingma & Welling, 2014) — standard Gaussian-prior baseline
+- **IWAE** (Burda et al., 2016) — K-sample importance-weighted bound
+- **VampPrior VAE** (Tomczak & Welling, 2018) — learned mixture-of-posteriors prior over pseudo-inputs
 
-```bash
-git clone https://github.com/ssslakter/vae-project.git
-cd vae-project
+## What we measured
+
+Generation quality with **FID** and **KID**, and latent geometry with a set of diagnostics: active units, per-dimension KL, PCA projections, a linear digit probe, latent traversals, and **MALA acceptance rates** along latent-space interpolations — a direct probe of posterior smoothness and connectivity.
+
+## Results
+
+**Sample quality vs. number of Langevin refinement steps** (lower is better):
+
+| Model         | Best config | FID ↓     | KID ↓       |
+| ------------- | ----------- | --------- | ----------- |
+| VAE           | 20 steps    | 18.53     | 0.00890     |
+| IWAE          | 5 steps     | 18.40     | 0.00869     |
+| **VampPrior** | 20 steps    | **18.04** | **0.00810** |
+
+- 5–20 refinement steps modestly improve samples; >=50 steps degrade them
+- Linear-probe accuracy is near-ceiling for all models (VAE 0.994, IWAE 0.991, VampPrior 1.000), so the differences below come from **geometry**, not label separability:
+  - **VAE** — one smooth, connected cloud; MALA acceptance stays high (>0.85) along interpolations
+  - **IWAE** — fragmented; MALA acceptance drops to ~0 mid-interpolation, i.e. a sharp, poorly connected posterior
+  - **VampPrior** — compact, separated clusters; high acceptance except at transitions between mixture components
+
+Full tables and analysis in [`docs/results.md`](docs/results.md); the technical report PDF has the figures and is attached in docs/.
+
+## Structure
+
+```
+vae_project/
+  models/     VAE, IWAE, VampPrior, Langevin, latent analysis (MALA)
+  train/      trainers, hooks, losses (ELBO, IWAE, VampPrior KL)
+  dataset/    Colored MNIST loading and transforms
+  evaluate.py FID / KID
+notebooks/    experiments per model + comparison
+docs/         results and analysis
 ```
 
-### 2. Set up the environment
-
-You need to install dependencies. Choose one method:
-
-#### Option A: Using Pixi (recommended, easiest)
-
-Pixi is similar to conda and automatically manages all dependencies for you:
+## Setup
 
 ```bash
-pixi install
-pixi shell -e dev # will also install jupyter into venv
+git clone https://github.com/Stacey-bubi/vae-models.git
+cd vae-models
+
+pixi install && pixi shell -e dev        # recommended
+# or: python -m venv venv && source venv/bin/activate && pip install .
 ```
 
-#### Option B: Using pip and virtual environment
+Then run the notebooks in `notebooks/` to reproduce the experiments.
 
-Create an isolated Python environment and install dependencies:
+## Authors
 
-```bash
-python -m venv venv          # Create isolated environment
-source venv/bin/activate     # Activate it
-pip install .                # Install the project
-```
+Viacheslav Chaunin, Alina Ermilova, Anastasiia Chernysheva - equal contribution.
+Supervisor: Alexander Kolesov (Skoltech).
 
-## Project Structure
+## License
 
-- `notebooks/` - Interactive Jupyter notebooks to run experiments
-- `vae_project/` - Main code package
-  - `models/` - The VAE neural network architecture
-  - `dataset/` - Code to load and prepare datasets
-  - `train/` - Training scripts and monitoring tools
-- `data/` - Contains the image datasets used for training
-
-## On commits in notebooks
-If you want to make things easier when updating notebooks and make sure you don't commit your metadata (cell execution num, timestamps, etc.) changes, you can use cli tool called `nbdev`.
-
-To clean metadata in all notebooks, run (it will keep all outputs, cells and you can continue to use the notebook):
-```bash
-nbdev_clean --fname .
-```
-
-It's already in optional dependencies and you can use it inside pixi shell. Or you can also install it with `pip install nbdev`.
+MIT — see [LICENSE](LICENSE).
