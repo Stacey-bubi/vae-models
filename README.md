@@ -30,7 +30,7 @@ Generation quality with **FID** and **KID**, and latent geometry with a set of d
   - **IWAE** — fragmented; MALA acceptance drops to ~0 mid-interpolation, i.e. a sharp, poorly connected posterior
   - **VampPrior** — compact, separated clusters; high acceptance except at transitions between mixture components
 
-Full tables and analysis in [`docs/results.md`](docs/results.md); the technical report PDF has the figures and is attached in docs/.
+Full tables and analysis in [`docs/results.md`](docs/results.md); the technical report PDF has the figures and is attached in [`docs/latent_space_of_VAE_p.pdf`](docs/latent_space_of_VAE_p.pdf).
 
 ## Structure
 
